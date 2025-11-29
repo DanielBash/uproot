@@ -1,2 +1,2 @@
 # uproot
-Python arcade game. World domination is such an ugly phrase. I prefer to call it world optimisation.
+Всего лишь игра. Цель - не дать слабину и уничтожить вселенную. Полностью написанная на python, она хрупка не оптимизирована.
