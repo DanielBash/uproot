@@ -1,4 +1,6 @@
-"""Universe manager. Goal: better big control over universe settings"""
+"""UTIL: Universe manager
+ - Seed generated data
+ - Chunk generation"""
 
 import random
 

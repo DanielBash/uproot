@@ -1,4 +1,7 @@
-"""Tile map manager. Goal: better control over universe settings"""
+"""UTIL: Tile map manager
+ - Easy tile map management
+ - Efficient display
+ - Procedurally generated tile maps"""
 
 import math
 import random

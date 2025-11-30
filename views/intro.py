@@ -1,4 +1,5 @@
-"""Intro view. Goal: Show off and flex our development team"""
+"""VIEW: Intro
+ - Flexes our development team"""
 
 import math
 import time

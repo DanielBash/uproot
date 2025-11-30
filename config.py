@@ -1,4 +1,5 @@
-""" Global data loading and management """
+"""FILE: Config
+ - Global data management"""
 
 import json
 import os

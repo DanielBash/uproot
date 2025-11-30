@@ -1,4 +1,5 @@
-""" Startup file """
+"""FILE: Main
+ - Run game instance"""
 
 import arcade
 import pyglet

@@ -1,4 +1,5 @@
-"""Main menu view. Goal: provide friendly GUI, for main game scene"""
+"""VIEW: Menu
+ - Provides friendly UI for settings and saves management"""
 
 import math
 import time

@@ -1,4 +1,5 @@
-"""Universe view. Goal: select star system"""
+"""VIEW: Planet
+ - Display current planet"""
 
 import math
 import time
