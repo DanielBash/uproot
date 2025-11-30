@@ -3,97 +3,133 @@
  - Chunk generation"""
 
 import random
+from dataclasses import dataclass
+from typing import List, Tuple
+from strgen import StringGenerator as SG
 
 
-# TODO: completely remake entire world generation
-class Planet:
-    def __init__(self, seed='seed',
-                 min_planet_size=10 ** 5,
-                 max_planet_size=10 ** 6):
+@dataclass
+class BiomSettings:
+    tiles: List[str]
+
+
+@dataclass
+class PlanetSettings:
+    name: SG = SG('[\l\d]{4:18}&[\d]&[\p]')
+    radius: Tuple[int] = (10 ** 10, 10 ** 12),
+    bioms: List[BiomSettings] = None
+
+
+@dataclass
+class StarSystemSettings:
+    name: SG = SG('[\l\d]{4:18}&[\d]&[\p]')
+    planet_amount: Tuple[int, int] = (3, 5),
+    planet_types: List[PlanetSettings] = None,
+    planet_orbit: Tuple[int, int] = (10 ** 6, 10 ** 8)
+
+
+@dataclass
+class UniverseSettings:
+    name: SG = SG('[\l\d]{4:18}&[\d]&[\p]')
+    ss_chunk: int = 10 ** 6,
+    ss_amount: Tuple[int, int] = (20, 150),
+    ss_types: List[Tuple[int, StarSystemSettings]] = None
+
+
+class Biom:
+    def __init__(self, settings: BiomSettings, seed: str = 'seed'):
+        self.settings = settings
         self.seed = seed
-        self.min_planet_size = min_planet_size
-        self.max_planet_size = max_planet_size
 
-    def get_tile(self, x, y):
-        pass
 
-    def get_tile_chunk(self, x, y, width, height):
-        pass
+class Planet:
+    def __init__(self, settings: PlanetSettings, seed: str = 'seed', orbit: int = 0):
+        # initialization settings
+        self.settings = settings
+        self.seed = seed
+        self.orbit = orbit
+
+        # procedural settings
+        self.name = ''
+
+        self.setup()
+
+    def setup(self):
+        # name generation
+        self.name = self.settings.name.render(seed=hash(self.seed))
+
+    def get_tile(self, x: int, y: int) -> str:
+        return 'grass_tile'
 
 
 class StarSystem:
-    def __init__(self, seed='seed',
-                 min_planet_size=10 ** 5,
-                 max_planet_size=10 ** 6,
-                 min_planets_in_star_system=2,
-                 max_planets_in_star_system=30):
+    def __init__(self, settings: StarSystemSettings, seed: str = 'seed', rel_x: int = 0, rel_y: int = 0):
+        # initialization settings
+        self.settings = settings
         self.seed = seed
-        self.min_planet_size = min_planet_size
-        self.max_planet_size = max_planet_size
-        self.min_planets_in_star_system = min_planets_in_star_system
-        self.max_planets_in_star_system = max_planets_in_star_system
+        self.rel_x = rel_x
+        self.rel_y = rel_y
 
-    def __str__(self):
-        return (f'StarSystem'
-                f'seed={self.seed}')
+        # procedural settings
+        self.planets = []
+        self.name = []
 
-    def from_json(self, data, replace_seed=False):
-        for i in data.keys():
-            if not (not replace_seed and i == 'seed'):
-                self.__setattr__(i, data[i])
+        self.setup()
 
-    def get_planets(self):
-        pass
+    def setup(self):
+        # name generation
+        self.name = self.settings.name.render(seed=hash(self.seed))
+
+        # planet generation
+        random.seed(self.seed)
+
+        planet_amount = random.randint(*self.settings.planet_amount)
+
+        for i in range(planet_amount):
+            settings_available = [setting for weight, setting in self.settings.planet_types]
+            settings_weights = [weight for weight, ss_setting in self.settings.planet_types]
+
+            planet_setting = random.choices(settings_available, weights=settings_weights)
+            orbit = random.randint(*self.settings.planet_orbit)
+
+            self.planets.append(Planet(planet_setting, f'{self.seed}_{orbit}', orbit))
 
 
 class Universe:
-    def __init__(self, seed='seed',
-                 star_density=1000,
-                 min_planet_size=10 ** 5,
-                 max_planet_size=10 ** 6,
-                 min_planets_in_star_system=2,
-                 max_planets_in_star_system=30,
-                 star_system_chunk=10 ** 10):
+    def __init__(self, settings: UniverseSettings, seed: str = 'seed'):
+        # initialization settings
+        self.settings = settings
         self.seed = seed
-        self.min_planet_size = min_planet_size
-        self.max_planet_size = max_planet_size
-        self.star_system_density = star_density
-        self.min_planets_in_star_system = min_planets_in_star_system
-        self.max_planets_in_star_system = max_planets_in_star_system
-        self.star_system_chunk = star_system_chunk
 
-    def get_star_chunk(self, x=0, y=0):
-        star_systems = []
+        # procedural settings
+        self.name = ''
 
-        random.seed(f'{self.seed}_{x}_{y}')
-        for i in range(self.star_system_density):
-            system_x = random.randint(0, self.star_system_chunk)
-            system_y = random.randint(0, self.star_system_chunk)
-            star_system = StarSystem(f'{self.seed}_{x}_{y}_{system_x}_{system_y}')
-            star_system.from_json(self.to_json(), replace_seed=False)
-            star_systems.append(star_system)
+        self.setup()
 
-        return star_systems
+    def setup(self):
+        # name generation
+        self.name = self.settings.name.render(seed=hash(self.seed))
 
-    def to_json(self):
-        return {'seed': self.seed,
-                'min_planet_size': self.min_planet_size,
-                'max_planet_size': self.max_planet_size,
-                'star_system_density': self.star_system_density,
-                'min_planets_in_star_system': self.min_planets_in_star_system,
-                'max_planets_in_star_system': self.max_planets_in_star_system,
-                'star_system_chunk': self.star_system_chunk}
+    def get_chunk(self, x: int, y: int) -> List[StarSystem]:
+        seed = f'{self.seed}_{x}_{y}'
 
-    def from_json(self, data):
-        for i in data.keys():
-            self.__setattr__(i, data[i])
+        random.seed(seed)
 
-    def __str__(self):
-        return (f"Universe"
-                f"seed={self.seed}"
-                f"star_system_density={self.star_system_density}"
-                f"min_planet_size={self.min_planet_size}"
-                f"max_planet_size={self.max_planet_size}"
-                f"min_planets={self.min_planets_in_star_system}"
-                f"max_planets={self.max_planets_in_star_system}"
-                f"star_chunk={self.star_system_chunk}")
+        ss_amount = random.randint(*self.settings.ss_amount)
+
+        sss = []
+
+        for i in range(ss_amount):
+            settings_available = [setting for weight, setting in self.settings.ss_types]
+            settings_weights = [weight for weight, ss_setting in self.settings.ss_types]
+
+            ss_setting = random.choices(settings_available, weights=settings_weights)
+
+            rel_x = random.randint(0, self.settings.ss_chunk)
+            rel_y = random.randint(0, self.settings.ss_chunk)
+
+            ss = StarSystem(ss_setting, f'{seed}_{rel_x}_{rel_y}', rel_x=rel_x, rel_y=rel_y)
+
+            sss.append(ss)
+
+        return sss

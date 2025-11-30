@@ -43,7 +43,7 @@ class Main(arcade.View):
         self.tile_map_drawer.draw(self.x * self.tile_map_drawer.tile_size, self.y * self.tile_map_drawer.tile_size)
 
     # -- handle updating
-    def on_update(self, delta_time):
+    def on_update(self, delta_time: int):
         self.tile_map_drawer.tile_size = int(self.zoom * self.scaling)
 
         if self.conf.KEYS['move_up'] in self.keys_pressed:
@@ -72,6 +72,6 @@ class Main(arcade.View):
         if self.keys_pressed.index(key) != -1:
             del self.keys_pressed[self.keys_pressed.index(key)]
 
-    def on_resize(self, width, height):
+    def on_resize(self, width: int, height: int):
         super().on_resize(width, height)
         self.scaling = min(width / 800, height / 600)

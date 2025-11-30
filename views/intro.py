@@ -78,7 +78,7 @@ class Main(arcade.View):
         self.clear()
         self.text_list.draw(pixelated=True)
 
-    def on_update(self, delta_time):
+    def on_update(self, delta_time: float):
         time_passed = time.time() - self.start_time
         self.credits_sprite.angle = self.title_sprite.angle = math.sin(time_passed * 3) * 3
 
@@ -108,7 +108,7 @@ class Main(arcade.View):
         if key == self.conf.WINDOW_FULLSCREEN_KEY:
             self.window.set_fullscreen(not self.window.fullscreen)
 
-    def on_resize(self, width, height):
+    def on_resize(self, width: int, height: int):
         super().on_resize(width, height)
         self.scaling = min(width / 800, height / 600)
 

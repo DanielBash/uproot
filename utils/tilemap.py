@@ -10,30 +10,28 @@ import arcade.examples.perf_test.stress_test_draw_moving_arcade
 from arcade import SpriteList, Sprite
 
 
-# TODO: refactor TileMap class. Add ability to display stars, and add proper planet view
 class TileMap:
-    def __init__(self, data):
-        self.data = data
+    def __init__(self, conf):
         self.cache = {}
+        self.conf = conf
 
-    def get(self, x, y):
+    def get(self, x: int, y: int):
         return
 
-    def get_texture(self, x, y):
+    def get_texture(self, x: int, y: int) -> arcade.Texture:
         name = self.get_texture_name(x, y)
         if not name in self.cache.keys():
-            self.cache[name] = self.data.assets.texture(name)
+            self.cache[name] = self.conf.assets.texture(name)
 
         return self.cache[name]
 
-    def get_texture_name(self, x, y):
+    def get_texture_name(self, x: int, y: int) -> str:
         random.seed(f'{x} {y}')
         return f'grass_tile{random.randint(1, 2)}'
 
 
-# TODO: optimize tile map drawer
 class TileMapDrawer:
-    def __init__(self, window, tile_map, tile_size=50):
+    def __init__(self, window: arcade.Window, tile_map: TileMap, tile_size: int = 50):
         self.window = window
         self.tile_size = tile_size
         self.tile_map = tile_map
@@ -67,7 +65,7 @@ class TileMapDrawer:
                                             'scale': 1}
                 self.tiles.append(tile)
 
-    def draw(self, x, y, pixelated=True):
+    def draw(self, x: int, y: int, pixelated: bool = True):
         self.prepare()
         x -= self.window.width // 2
         y -= self.window.height // 2

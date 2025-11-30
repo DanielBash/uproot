@@ -12,7 +12,7 @@ from pyglet.math import Vec2
 from .planet import Main as play_view
 
 
-# TODO: Make menu scale, and improve general styles
+
 class Main(arcade.View):
     def __init__(self, config):
         super().__init__()
@@ -63,7 +63,7 @@ class Main(arcade.View):
         self.ui.draw()
 
     # -- handle updating
-    def on_update(self, delta_time):
+    def on_update(self, delta_time: float):
         pass
 
     # -- handle user input
@@ -71,7 +71,7 @@ class Main(arcade.View):
         if key == self.conf.WINDOW_FULLSCREEN_KEY:
             self.window.set_fullscreen(not self.window.fullscreen)
 
-    def on_resize(self, width, height):
+    def on_resize(self, width: int, height: int):
         super().on_resize(width, height)
         self.scaling = min(width / 800, height / 600)
 

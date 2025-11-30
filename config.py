@@ -7,6 +7,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 import arcade
 import pyglet
@@ -16,7 +17,7 @@ from utils import tilemap
 
 
 class PathConfig:
-    def __init__(self, data_file, asset_folder):
+    def __init__(self, data_file: Path, asset_folder: Path):
         self.supported_ext = ['.png', '.jpg', '.jpeg', '.ico', '.json', '.mp3', '.wav']
 
         # roots
@@ -41,7 +42,7 @@ class PathConfig:
             os.chdir(sys._MEIPASS)
 
     # -- base method
-    def get(self, folder, name):
+    def get(self, folder, name) -> Optional[Path]:
         path = folder / Path(name)
 
         if not path.exists():
@@ -53,35 +54,35 @@ class PathConfig:
         return None
 
     # -- paths shortcuts
-    def short(self, short, name):
+    def short(self, short, name) -> Path:
         return self.get(self.shortcuts[short], name)
 
 
 class AssetsConfig:
-    def __init__(self, paths):
+    def __init__(self, paths: PathConfig):
         self.paths = paths
 
-    def icon(self, name):
+    def icon(self, name: str) -> pyglet.image.AbstractImage:
         image_path = self.paths.short('icon', name)
 
-        return pyglet.image.load(image_path)
+        return pyglet.image.load(str(image_path))
 
-    def music(self, name, streaming=True):
+    def music(self, name: str, streaming: bool = True) -> arcade.Sound:
         music_path = self.paths.short('music', name)
 
         return arcade.load_sound(music_path, streaming=streaming)
 
-    def effect(self, name, streaming=True):
+    def effect(self, name: str, streaming: bool = True) -> arcade.Sound:
         music_path = self.paths.short('effect', name)
 
         return arcade.load_sound(music_path, streaming=streaming)
 
-    def texture(self, name):
+    def texture(self, name: str) -> arcade.Texture:
         return arcade.load_texture(self.paths.short('texture', name))
 
 
 class DataConfig:
-    def __init__(self, paths):
+    def __init__(self, paths: PathConfig):
         self.paths = paths
 
         self.data = {}
