@@ -3,6 +3,7 @@
 import random
 
 
+# TODO: completely remake entire world generation
 class Planet:
     def __init__(self, seed='seed',
                  min_planet_size=10 ** 5,
@@ -41,6 +42,7 @@ class StarSystem:
 
     def get_planets(self):
         pass
+
 
 class Universe:
     def __init__(self, seed='seed',

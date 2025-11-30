@@ -8,9 +8,10 @@ import arcade.gui
 import arcade.gui.widgets.buttons
 import arcade.gui.widgets.layout
 from pyglet.math import Vec2
-from .universe import Main as universe
+from .planet import Main as play_view
 
 
+# TODO: Make menu scale, and improve general styles
 class Main(arcade.View):
     def __init__(self, config):
         super().__init__()
@@ -78,7 +79,7 @@ class Main(arcade.View):
 
     def start_button_click(self, event):
         arcade.play_sound(self.conf.assets.effect('button_click'))
-        next_view = universe(self.conf)
+        next_view = play_view(self.conf)
         self.window.show_view(next_view)
 
     # -- handle system events

@@ -118,14 +118,21 @@ class Config:
 
     WINDOW_ICON = 'window_icon'
 
-    WINDOW_FULLSCREEN_KEY = arcade.key.F11
-
     # view management
     LAUNCH_VIEW = intro.Main
 
     # paths
     DATA_FILE = Path('saves/save.json')
     ASSETS_FOLDER = Path('assets')
+
+    # controls
+    KEYS = {'fullscreen': arcade.key.F11,
+            'move_up': arcade.key.UP,
+            'move_down': arcade.key.DOWN,
+            'move_left': arcade.key.LEFT,
+            'move_right': arcade.key.RIGHT,
+            'zoom_in': arcade.key.W,
+            'zoom_out': arcade.key.S}
 
     # -- dynamic config modules
     paths = PathConfig(DATA_FILE, ASSETS_FOLDER)
