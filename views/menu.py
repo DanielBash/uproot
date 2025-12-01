@@ -9,7 +9,7 @@ import arcade.gui
 import arcade.gui.widgets.buttons
 import arcade.gui.widgets.layout
 from pyglet.math import Vec2
-from .planet import Main as play_view
+from .universe import Main as play_view
 
 
 
@@ -68,7 +68,7 @@ class Main(arcade.View):
 
     # -- handle user input
     def on_key_press(self, key, key_modifiers):
-        if key == self.conf.WINDOW_FULLSCREEN_KEY:
+        if key == self.conf.KEYS['fullscreen']:
             self.window.set_fullscreen(not self.window.fullscreen)
 
     def on_resize(self, width: int, height: int):

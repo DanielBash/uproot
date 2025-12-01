@@ -1,14 +1,10 @@
 """VIEW: Planet
  - Display current planet"""
 
-import math
-import time
-from math import sin
 import arcade
 import arcade.gui
 import arcade.gui.widgets.buttons
 import arcade.gui.widgets.layout
-from pyglet.math import Vec2
 
 
 class Main(arcade.View):
@@ -22,8 +18,11 @@ class Main(arcade.View):
         # SCENE SETTINGS
         self.background_color = arcade.color.Color(33, 23, 41)
 
+        # universe settings
+        universe = config.generation.Universe(settings=config.DEFAULT_UNIVERSE_SETTINGS)
+
         # sprites
-        self.tile_map = self.conf.tiles.TileMap(self.conf)
+        self.tile_map = self.conf.tiles.StarTileMap(universe, config)
         self.tile_map_drawer = self.conf.tiles.TileMapDrawer(self.window, self.tile_map)
 
         # dynamic variables

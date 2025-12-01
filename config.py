@@ -14,6 +14,8 @@ import pyglet
 
 from views import intro, menu
 from utils import tilemap
+from utils import generation
+from strgen import StringGenerator as SG
 
 
 class PathConfig:
@@ -121,7 +123,7 @@ class Config:
     WINDOW_ICON = 'window_icon'
 
     # view management
-    LAUNCH_VIEW = intro.Main
+    LAUNCH_VIEW = menu.Main
 
     # paths
     DATA_FILE = Path('saves/save.json')
@@ -136,10 +138,41 @@ class Config:
             'zoom_in': arcade.key.W,
             'zoom_out': arcade.key.S}
 
+    # generation
+    DEFAULT_UNIVERSE_SETTINGS = generation.UniverseSettings(
+        name=SG('testing_[\l]{10}'),
+        ss_chunk=10**6,
+        ss_amount=(20, 150),
+        ss_types=[
+            (80, generation.StarSystemSettings(
+                name=SG('small_[\l]{10}'),
+                planet_amount=(2, 5),
+                planet_types=[(1, generation.PlanetSettings(
+                    name=SG('regular_[\l]{10}'),
+                    radius=(10 ** 11, 10 ** 12),
+                    bioms=[]
+                ))],
+                planet_orbit=(10 ** 7, 10 ** 8)
+            )),
+
+            (20, generation.StarSystemSettings(
+                name=SG('big_[\l]{10}'),
+                planet_amount=(10, 15),
+                planet_types=[(1, generation.PlanetSettings(
+                    name=SG('regular_[\l]{10}'),
+                    radius=(10 ** 11, 10 ** 12),
+                    bioms=[]
+                ))],
+                planet_orbit=(10 ** 7, 10 ** 8)
+            ))
+        ]
+    )
+
     # -- dynamic config modules
     paths = PathConfig(DATA_FILE, ASSETS_FOLDER)
     assets = AssetsConfig(paths)
     data = DataConfig(paths)
     tiles = tilemap
+    generation = generation
 
     start_time = time.time()

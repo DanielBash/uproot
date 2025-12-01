@@ -3,37 +3,37 @@
  - Chunk generation"""
 
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Tuple
 from strgen import StringGenerator as SG
 
 
 @dataclass
 class BiomSettings:
-    tiles: List[str]
+    tiles: List[str] = field(default_factory=list)
 
 
 @dataclass
 class PlanetSettings:
-    name: SG = SG('[\l\d]{4:18}&[\d]&[\p]')
-    radius: Tuple[int] = (10 ** 10, 10 ** 12),
-    bioms: List[BiomSettings] = None
+    name: SG = SG('www')
+    radius: Tuple[int, int] = (10 ** 10, 10 ** 12)
+    bioms: List[BiomSettings] = field(default_factory=list)
 
 
 @dataclass
 class StarSystemSettings:
-    name: SG = SG('[\l\d]{4:18}&[\d]&[\p]')
-    planet_amount: Tuple[int, int] = (3, 5),
-    planet_types: List[PlanetSettings] = None,
+    name: SG = SG('www')
+    planet_amount: Tuple[int, int] = (3, 5)
+    planet_types: List[Tuple[int, PlanetSettings]] = field(default_factory=list)
     planet_orbit: Tuple[int, int] = (10 ** 6, 10 ** 8)
 
 
 @dataclass
 class UniverseSettings:
-    name: SG = SG('[\l\d]{4:18}&[\d]&[\p]')
-    ss_chunk: int = 10 ** 6,
-    ss_amount: Tuple[int, int] = (20, 150),
-    ss_types: List[Tuple[int, StarSystemSettings]] = None
+    name: SG = SG('www')
+    ss_chunk: int = 10 ** 6
+    ss_amount: Tuple[int, int] = (20, 150)
+    ss_types: List[Tuple[int, StarSystemSettings]] = field(default_factory=list)
 
 
 class Biom:
@@ -89,7 +89,7 @@ class StarSystem:
             settings_available = [setting for weight, setting in self.settings.planet_types]
             settings_weights = [weight for weight, ss_setting in self.settings.planet_types]
 
-            planet_setting = random.choices(settings_available, weights=settings_weights)
+            planet_setting = random.choices(settings_available, weights=settings_weights, k=1)[0]
             orbit = random.randint(*self.settings.planet_orbit)
 
             self.planets.append(Planet(planet_setting, f'{self.seed}_{orbit}', orbit))
@@ -123,7 +123,7 @@ class Universe:
             settings_available = [setting for weight, setting in self.settings.ss_types]
             settings_weights = [weight for weight, ss_setting in self.settings.ss_types]
 
-            ss_setting = random.choices(settings_available, weights=settings_weights)
+            ss_setting = random.choices(settings_available, weights=settings_weights, k=1)[0]
 
             rel_x = random.randint(0, self.settings.ss_chunk)
             rel_y = random.randint(0, self.settings.ss_chunk)

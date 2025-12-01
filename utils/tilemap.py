@@ -5,9 +5,15 @@
 
 import math
 import random
+from typing import Tuple
 
 import arcade.examples.perf_test.stress_test_draw_moving_arcade
 from arcade import SpriteList, Sprite
+from typing import Tuple
+
+from PIL import Image, ImageDraw
+import random
+import arcade
 
 
 class TileMap:
@@ -20,7 +26,7 @@ class TileMap:
 
     def get_texture(self, x: int, y: int) -> arcade.Texture:
         name = self.get_texture_name(x, y)
-        if not name in self.cache.keys():
+        if name not in self.cache.keys():
             self.cache[name] = self.conf.assets.texture(name)
 
         return self.cache[name]
@@ -85,7 +91,7 @@ class TileMapDrawer:
                     self.tile_access[(w, h)]['texture'] = self.tile_map.get_texture_name(tile_x, tile_y)
 
                 calc_scale = self.tile_size / (
-                            self.tile_access[(w, h)]['tile'].width / self.tile_access[(w, h)]['scale'])
+                        self.tile_access[(w, h)]['tile'].width / self.tile_access[(w, h)]['scale'])
                 if self.tile_access[(w, h)]['tile'].scale != calc_scale:
                     self.tile_access[(w, h)]['tile'].scale = calc_scale
                     self.tile_access[(w, h)]['scale'] = calc_scale
@@ -93,3 +99,48 @@ class TileMapDrawer:
                 self.tile_access[(w, h)]['tile'].center_y = -move_y + self.tile_size // 2 + h * self.tile_size
 
         self.tiles.draw(pixelated=pixelated)
+
+
+class StarTileMap:
+    def __init__(self, universe, conf):
+        self.cache = {}
+        self.universe = universe
+        self.conf = conf
+
+    def generate_texture(self, x: int, y: int, size: Tuple[int, int]) -> arcade.Texture:
+        width, height = size
+
+        image = Image.new("RGBA", (width, height), (0, 0, 0, 255))
+        draw = ImageDraw.Draw(image)
+
+        for _ in self.universe.get_chunk(x, y):
+            star_x = _.rel_x / self.universe.settings.ss_chunk * width
+            star_y = _.rel_y / self.universe.settings.ss_chunk * height
+
+            star_size = random.choice([1, 1, 1, 2, 2, 3])
+
+            left = star_x - star_size
+            top = star_y - star_size
+            right = star_x + star_size
+            bottom = star_y + star_size
+
+            draw.ellipse([left, top, right, bottom],
+                         fill=(255, 255, 255, 255))
+
+        texture = arcade.Texture(image)
+
+        if len(self.cache) > 1000:
+            self.cache.clear()
+
+        return texture
+
+    def get_texture(self, x: int, y: int) -> arcade.Texture:
+        name = self.get_texture_name(x, y)
+
+        if name not in self.cache.keys():
+            self.cache[name] = self.generate_texture(x, y, size=(512, 512))
+
+        return self.cache[name]
+
+    def get_texture_name(self, x: int, y: int) -> str:
+        return f'{x} {y}'

@@ -105,7 +105,7 @@ class Main(arcade.View):
         self.title_sprite.scale = self.scaling
 
     def on_key_press(self, key, key_modifiers):
-        if key == self.conf.WINDOW_FULLSCREEN_KEY:
+        if key == self.conf.KEYS['fullscreen']:
             self.window.set_fullscreen(not self.window.fullscreen)
 
     def on_resize(self, width: int, height: int):
