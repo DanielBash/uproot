@@ -21,6 +21,8 @@ def main():
                             conf.WINDOW_MINIMAL_HEIGHT)
     window.show_view(conf.LAUNCH_VIEW(conf))
     window.set_icon(conf.assets.icon(conf.WINDOW_ICON))
+    if conf.DEBUG:
+        arcade.enable_timings()
     arcade.run()
 
 

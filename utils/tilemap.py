@@ -33,7 +33,7 @@ class TileMap:
 
     def get_texture_name(self, x: int, y: int) -> str:
         random.seed(f'{x} {y}')
-        return f'grass_tile{random.randint(1, 2)}'
+        return f'grass_tile{random.randint(1, 10)}'
 
 
 class TileMapDrawer:
@@ -42,19 +42,19 @@ class TileMapDrawer:
         self.tile_size = tile_size
         self.tile_map = tile_map
 
-        self.tiles = SpriteList(use_spatial_hash=True)
+        self.tiles = SpriteList(use_spatial_hash=False)
         self.tile_access = {}
         self.sprite_cache = ''
-        self.sprites_width = self.window.width // self.tile_size + 3
-        self.sprites_height = self.window.height // self.tile_size + 3
+        self.column_amount = self.window.width // self.tile_size + 2
+        self.row_amount = self.window.height // self.tile_size + 2
 
         self.prepare()
 
     def prepare(self):
-        self.sprites_width = math.ceil(self.window.width // self.tile_size + 3)
-        self.sprites_height = math.ceil(self.window.height // self.tile_size + 3)
+        self.column_amount = math.ceil(self.window.width // self.tile_size + 2)
+        self.row_amount = math.ceil(self.window.height // self.tile_size + 2)
 
-        sprite_state = f'{self.sprites_height}_{self.sprites_width}_{self.tile_size}'
+        sprite_state = f'{self.row_amount}_{self.column_amount}_{self.tile_size}'
         if sprite_state == self.sprite_cache:
             return
         else:
@@ -63,8 +63,8 @@ class TileMapDrawer:
         self.tiles.clear()
         self.tile_access.clear()
 
-        for w in range(self.sprites_width):
-            for h in range(self.sprites_height):
+        for w in range(self.column_amount):
+            for h in range(self.row_amount):
                 tile = Sprite()
                 self.tile_access[(w, h)] = {'tile': tile,
                                             'texture': '',
@@ -73,6 +73,7 @@ class TileMapDrawer:
 
     def draw(self, x: int, y: int, pixelated: bool = True):
         self.prepare()
+
         x -= self.window.width // 2
         y -= self.window.height // 2
 
@@ -81,8 +82,8 @@ class TileMapDrawer:
         move_x = x % self.tile_size
         move_y = y % self.tile_size
 
-        for w in range(self.sprites_width):
-            for h in range(self.sprites_height):
+        for w in range(self.column_amount):
+            for h in range(self.row_amount):
                 tile_x = tile_start_x + w
                 tile_y = tile_start_y + h
 
@@ -90,13 +91,21 @@ class TileMapDrawer:
                     self.tile_access[(w, h)]['tile'].texture = self.tile_map.get_texture(tile_x, tile_y)
                     self.tile_access[(w, h)]['texture'] = self.tile_map.get_texture_name(tile_x, tile_y)
 
+                # calculate changes
                 calc_scale = self.tile_size / (
                         self.tile_access[(w, h)]['tile'].width / self.tile_access[(w, h)]['scale'])
+                calc_center_x = -move_x + self.tile_size // 2 + w * self.tile_size
+                calc_center_y = -move_y + self.tile_size // 2 + h * self.tile_size
+
+                # apply changes if actually needed
                 if self.tile_access[(w, h)]['tile'].scale != calc_scale:
                     self.tile_access[(w, h)]['tile'].scale = calc_scale
                     self.tile_access[(w, h)]['scale'] = calc_scale
-                self.tile_access[(w, h)]['tile'].center_x = -move_x + self.tile_size // 2 + w * self.tile_size
-                self.tile_access[(w, h)]['tile'].center_y = -move_y + self.tile_size // 2 + h * self.tile_size
+
+                if (self.tile_access[(w, h)]['tile'].center_x, self.tile_access[(w, h)]['tile'].center_y) != (
+                calc_center_x, calc_center_y):
+                    self.tile_access[(w, h)]['tile'].center_x = calc_center_x
+                    self.tile_access[(w, h)]['tile'].center_y = calc_center_y
 
         self.tiles.draw(pixelated=pixelated)
 
@@ -144,3 +153,109 @@ class StarTileMap:
 
     def get_texture_name(self, x: int, y: int) -> str:
         return f'{x} {y}'
+
+
+# PROCEED WITH CATION: HIGHLY OPTIMIZED CLASSES(!)
+class OptimizedTileMap:
+    def __init__(self, conf):
+        self.conf = conf
+
+        self.textures = []
+        self.tex_size = 0
+
+        self.setup()
+
+    def setup(self):
+        self.textures = [self.conf.assets.texture(f'grass_tile{i + 1}') for i in range(10)]
+        self.tex_size = self.textures[0].width
+
+    def tex_all(self):
+        return self.textures
+
+    def tex_hash(self, x: int, y: int):
+        ind = abs(int(x * 92821) ^ int(y * 68937)) % 10
+        return ind
+
+    def tex(self, x: int = 0, y: int = 0):
+        return self.textures[self.tex_hash(x, y)]
+
+
+class OptimizedTileMapDrawer:
+    def __init__(self, window: arcade.Window, tile_map: OptimizedTileMap, zoom: int = 1):
+        self.window = window
+        self.zoom = zoom
+        self.tile_map = tile_map
+
+        self.tiles = SpriteList(use_spatial_hash=False)
+        self.tiles.preload_textures(self.tile_map.tex_all())
+        self.tile_access = {}
+
+        self.tile_size = self.tile_map.tex_size
+
+        self.column_amount = self.window.width // self.tile_size + 2
+        self.row_amount = self.window.height // self.tile_size + 2
+
+        self.camera = arcade.Camera2D()
+
+        # caching
+        self._prev_column_amount = 0
+        self._prev_row_amount = 0
+        self._prev_window_size = self.window.size
+        self._prev_tile_start = (1, 1)
+
+        self.prepare()
+
+    def prepare(self):
+        self.column_amount = math.ceil(self.window.width // (self.tile_size * self.camera.zoom) + 2)
+        self.row_amount = math.ceil(self.window.height // (self.tile_size * self.camera.zoom) + 2)
+
+        if self.column_amount == self._prev_column_amount and self.row_amount == self._prev_row_amount:
+            return
+
+        self._prev_column_amount, self._prev_row_amount = self.column_amount, self.row_amount
+
+        for w in range(self.column_amount):
+            for h in range(self.row_amount):
+                if (w, h) not in self.tile_access:
+                    tile = Sprite()
+                    tile.texture = self.tile_map.tex(w, h)
+                    tile.th = self.tile_map.tex_hash(w, h)
+
+                    tile.center_x = tile.texture.width // 2 + w * tile.texture.width
+                    tile.center_y = tile.texture.height // 2 + h * tile.texture.height
+
+                    self.tile_access[(w, h)] = tile
+
+                    self.tiles.append(tile)
+
+    def draw(self, x: int, y: int, pixelated: bool = True):
+        self.prepare()
+
+        # update camera
+        move_x = x % self.tile_size
+        move_y = y % self.tile_size
+
+        self.camera.zoom = self.zoom
+        self.camera.position = (move_x + self.camera.viewport_width / (2 * self.camera.zoom),
+                                move_y + self.camera.viewport_height / (2 * self.camera.zoom))
+        if self.window.size != self._prev_window_size:
+            self.camera.match_window()
+
+        self.camera.use()
+
+        # update tile textures if necessary
+
+        tile_start_x = x // self.tile_size
+        tile_start_y = y // self.tile_size
+
+        if (tile_start_x, tile_start_y) != self._prev_tile_start:
+            for w in range(self.column_amount):
+                for h in range(self.row_amount):
+                    tile_x = tile_start_x + w
+                    tile_y = tile_start_y + h
+
+                    if self.tile_access[(w, h)].th != self.tile_map.tex_hash(tile_x, tile_y):
+                        self.tile_access[(w, h)].texture = self.tile_map.tex(tile_x, tile_y)
+                        self.tile_access[(w, h)].th = self.tile_map.tex_hash(tile_x, tile_y)
+            self._prev_tile_start = (tile_start_x, tile_start_y)
+        self.tiles.draw(pixelated=pixelated)

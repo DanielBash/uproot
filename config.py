@@ -136,7 +136,8 @@ class Config:
             'move_left': arcade.key.LEFT,
             'move_right': arcade.key.RIGHT,
             'zoom_in': arcade.key.W,
-            'zoom_out': arcade.key.S}
+            'zoom_out': arcade.key.S,
+            'action': arcade.key.Z}
 
     # generation
     DEFAULT_UNIVERSE_SETTINGS = generation.UniverseSettings(
@@ -167,6 +168,9 @@ class Config:
             ))
         ]
     )
+
+    # general debug option
+    DEBUG = True
 
     # -- dynamic config modules
     paths = PathConfig(DATA_FILE, ASSETS_FOLDER)

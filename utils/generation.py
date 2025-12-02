@@ -15,14 +15,14 @@ class BiomSettings:
 
 @dataclass
 class PlanetSettings:
-    name: SG = SG('www')
+    name: SG = SG('name_template_planet')
     radius: Tuple[int, int] = (10 ** 10, 10 ** 12)
     bioms: List[BiomSettings] = field(default_factory=list)
 
 
 @dataclass
 class StarSystemSettings:
-    name: SG = SG('www')
+    name: SG = SG('name_template_star_system')
     planet_amount: Tuple[int, int] = (3, 5)
     planet_types: List[Tuple[int, PlanetSettings]] = field(default_factory=list)
     planet_orbit: Tuple[int, int] = (10 ** 6, 10 ** 8)
@@ -30,7 +30,7 @@ class StarSystemSettings:
 
 @dataclass
 class UniverseSettings:
-    name: SG = SG('www')
+    name: SG = SG('name_template_universe')
     ss_chunk: int = 10 ** 6
     ss_amount: Tuple[int, int] = (20, 150)
     ss_types: List[Tuple[int, StarSystemSettings]] = field(default_factory=list)
