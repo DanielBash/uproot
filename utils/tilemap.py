@@ -231,11 +231,15 @@ class OptimizedTileMapDrawer:
     def draw(self, x: int, y: int, pixelated: bool = True):
         self.prepare()
 
+        self.camera.zoom = self.zoom
+
+        x -= self.camera.viewport_width / (2 * self.camera.zoom)
+        y -= self.camera.viewport_height / (2 * self.camera.zoom)
+
         # update camera
         move_x = x % self.tile_size
         move_y = y % self.tile_size
 
-        self.camera.zoom = self.zoom
         self.camera.position = (move_x + self.camera.viewport_width / (2 * self.camera.zoom),
                                 move_y + self.camera.viewport_height / (2 * self.camera.zoom))
         if self.window.size != self._prev_window_size:
